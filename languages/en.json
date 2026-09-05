@@ -1,0 +1,21 @@
+{
+  "RCD.Dock.Allies": "Allies — the Rippers",
+  "RCD.Dock.Enemies": "Enemies",
+  "RCD.Dock.Round": "Round",
+  "RCD.Dock.NoQueue": "The table selects — no initiative",
+  "RCD.Card.HP": "HP",
+  "RCD.Card.MP": "MP",
+  "RCD.Card.Spent": "Spent",
+  "RCD.Card.Defeated": "Defeated",
+  "RCD.Card.Staggered": "Staggered",
+  "RCD.Card.Studied": "Studied",
+  "RCD.Card.Unstudied": "Unstudied",
+  "RCD.Card.EndTurn": "End the turn",
+  "RCD.Ctl.Defeated": "Toggle defeated",
+  "RCD.Ctl.Hidden": "Toggle hidden",
+  "RCD.Ctl.Ping": "Ping",
+  "RCD.Ctl.Eye": "GM — override the Study gate",
+  "RCD.Ctl.Studied": "Toggle studied",
+  "RCD.Settings.ShowVitals": "Show vitals bars",
+  "RCD.Settings.ShowVitalsHint": "Display HP and MP bars on dock cards. The Study gate on enemy vitals still applies — this only hides what you could already see."
+}

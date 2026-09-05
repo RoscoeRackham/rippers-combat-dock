@@ -1,0 +1,44 @@
+{
+  "id": "rippers-combat-dock",
+  "title": "Rippers — Combat Dock",
+  "description": "A faction-centric combat dock for Project FU: allies and enemies as portrait-card ribbons around a round totem. FU has no initiative queue — clicking a card selects the actor and chooses the turn; turn-end routes through the system's own end-turn path. Enemy vitals stay veiled until Studied (7+ reveals HP/MP), staggered enemies wear their turn-loss openly, and the dock opens and closes with combat, collapsing any live party HUD while it holds the top of the screen.",
+  "version": "0.1.0",
+  "authors": [
+    {
+      "name": "Rippers Unmasked"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "13",
+    "maximum": "13"
+  },
+  "esmodules": [
+    "scripts/rippers-combat-dock.mjs"
+  ],
+  "styles": [
+    "styles/rippers-combat-dock.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    }
+  ],
+  "relationships": {
+    "systems": [
+      {
+        "id": "projectfu",
+        "type": "system",
+        "compatibility": {
+          "minimum": "4.16.0",
+          "verified": "4.16.2"
+        }
+      }
+    ]
+  },
+  "url": "https://github.com/RoscoeRackham/rippers-combat-dock",
+  "manifest": "https://github.com/RoscoeRackham/rippers-combat-dock/releases/latest/download/module.json",
+  "download": "https://github.com/RoscoeRackham/rippers-combat-dock/releases/latest/download/rippers-combat-dock.zip"
+}

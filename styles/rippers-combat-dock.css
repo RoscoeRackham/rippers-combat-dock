@@ -1,0 +1,109 @@
+/* RIPPERS — COMBAT DOCK · 2a Slash register (design of record: combat-dock r2).
+   Tokens local to the dock; faces resolve when the theme loads them, degrade cleanly otherwise.
+   Semantics kept: HP #c8102a · MP #2f6fb0 · guise violet #7b4bd8 · Pirata never all-caps. */
+#rcd-dock {
+	--rt-bg: #070405; --rt-panel: #14090b; --rt-card: #180b0e; --rt-raised: #241014;
+	--rt-red: #c8102a; --rt-blood: #5c0d18; --rt-border: #3a2026;
+	--rt-cream: #efe6d5; --rt-bone-dim: #b8a88e; --rt-muted: #7d6f63;
+	--rcd-hp: #c8102a; --rcd-mp: #2f6fb0; --rcd-violet: #7b4bd8; --rcd-gold: #c9a227;
+	--rt-mono: 'IBM Plex Mono', ui-monospace, monospace;
+	--rt-disp: 'Grenze Gotisch', 'Times New Roman', serif;
+	--rt-verb: 'Pirata One', 'Grenze Gotisch', serif;
+	position: fixed; top: 0; left: 0; right: 0; z-index: 90; pointer-events: none;
+	padding: 12px 22px 10px;
+	background: linear-gradient(rgba(7,4,5,.94), rgba(7,4,5,.78) 82%, transparent);
+	border-top: 2px solid var(--rt-red);
+	font-family: var(--rt-mono);
+}
+#rcd-dock .rcd-inner { display: flex; gap: 18px; align-items: flex-end; justify-content: center; pointer-events: auto; }
+#rcd-dock .rcd-flank { flex: 1 1 0; min-width: 0; }
+#rcd-dock .rcd-flank-head { font-family: var(--rt-mono); font-size: 9px; font-weight: 600; letter-spacing: .14em;
+	color: var(--rt-bone-dim); margin-bottom: 6px; }
+#rcd-dock .rcd-enemies .rcd-flank-head { text-align: right; }
+#rcd-dock .rcd-cards { display: flex; gap: 12px; align-items: flex-end; padding-top: 8px; overflow-x: auto; }
+#rcd-dock .rcd-allies .rcd-cards { justify-content: flex-end; }
+
+/* card */
+#rcd-dock .rcd-card { position: relative; width: 118px; flex: none; background: var(--rt-card);
+	border: 1px solid var(--rt-blood); padding: 6px 8px 8px; cursor: pointer;
+	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+	box-shadow: 3px 3px 0 rgba(0,0,0,.5); }
+#rcd-dock .rcd-active { border-color: var(--rt-red); border-top: 3px solid var(--rt-red);
+	box-shadow: 5px 5px 0 rgba(0,0,0,.6); transform: translateY(-6px); }
+#rcd-dock .rcd-spent { opacity: .55; }
+#rcd-dock .rcd-defeated { filter: grayscale(1) brightness(.7); cursor: default; }
+
+#rcd-dock .rcd-portrait { position: relative; height: 64px; border: 1px solid var(--rt-border);
+	overflow: hidden; background: var(--rt-raised); }
+#rcd-dock .rcd-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* stagger ribbon — enemy-only (ruled); scoped to the portrait frame, never over text */
+#rcd-dock .rcd-ribbon { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 2; }
+#rcd-dock .rcd-ribbon > span { position: absolute; left: -30px; right: -30px; top: 34%; display: block;
+	transform: rotate(-14deg); background: var(--rt-red); border: 1px solid var(--rt-blood);
+	box-shadow: 0 2px 0 rgba(0,0,0,.5); text-align: center; padding: 2px 0;
+	font-family: var(--rt-verb); font-size: 14px; color: #fff; letter-spacing: .06em;
+	text-shadow: 1px 1px 0 rgba(7,4,5,.8); }
+
+/* hover controls */
+#rcd-dock .rcd-controls { position: absolute; top: 4px; left: 0; right: 0; display: none; gap: 4px;
+	justify-content: center; z-index: 3; }
+#rcd-dock .rcd-card:hover .rcd-controls { display: flex; }
+#rcd-dock .rcd-ctl { width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+	font-family: var(--rt-mono); font-size: 11px; color: var(--rt-cream); background: rgba(7,4,5,.92);
+	border: 1px solid var(--rt-blood); cursor: pointer; padding: 0; }
+#rcd-dock .rcd-ctl-eye, #rcd-dock .rcd-ctl-study { color: var(--rcd-gold); border-color: var(--rcd-gold); }
+#rcd-dock .rcd-ctl.rcd-on { background: var(--rcd-gold); color: #070405; }
+
+/* stamps and chips */
+#rcd-dock .rcd-stamp { position: absolute; top: 26px; left: 0; right: 0; text-align: center; z-index: 3;
+	transform: rotate(-8deg); pointer-events: none; font-family: var(--rt-mono); font-size: 9px; font-weight: 600;
+	letter-spacing: .22em; color: var(--rt-bone-dim); }
+#rcd-dock .rcd-stamp::first-letter { text-transform: uppercase; }
+#rcd-dock .rcd-stamp { text-transform: uppercase; }
+#rcd-dock .rcd-stamp-dead { color: #fff; }
+#rcd-dock .rcd-name { font-family: var(--rt-disp); font-weight: 800; font-size: 13px; line-height: 1.15;
+	color: var(--rt-cream); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#rcd-dock .rcd-active .rcd-name { color: #fff; text-shadow: 2px 2px 0 rgba(7,4,5,.9); }
+#rcd-dock .rcd-guise { display: inline-block; font-family: var(--rt-mono); font-size: 8px; font-weight: 600;
+	letter-spacing: .1em; color: #fff; background: var(--rcd-violet); padding: 1px 6px; margin-top: 3px;
+	transform: rotate(-1.5deg); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#rcd-dock .rcd-study { display: block; text-align: right; margin-top: 2px; font-family: var(--rt-mono);
+	font-size: 7.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+	color: var(--rt-muted); }
+#rcd-dock .rcd-study.rcd-studied { color: var(--rt-cream); }
+
+/* vitals */
+#rcd-dock .rcd-line { margin-top: 4px; }
+#rcd-dock .rcd-line-head { display: flex; justify-content: space-between; font-family: var(--rt-mono);
+	font-size: 8.5px; letter-spacing: .08em; color: var(--rt-bone-dim); }
+#rcd-dock .rcd-line-head span:first-child { color: var(--rt-muted); font-weight: 600; }
+#rcd-dock .rcd-bar { position: relative; height: 7px; background: var(--rt-raised);
+	border: 1px solid rgba(0,0,0,.6); margin-top: 3px; }
+#rcd-dock .rcd-bar-veiled { background: transparent; border: 1px dashed var(--rt-border); }
+#rcd-dock .rcd-fill { position: absolute; top: 0; bottom: 0; left: 0; display: block; }
+#rcd-dock .rcd-fill-hp { background: var(--rcd-hp); }
+#rcd-dock .rcd-fill-mp { background: var(--rcd-mp); }
+
+/* end-turn — the one dock verb; Pirata, natural case */
+#rcd-dock .rcd-end { display: block; width: 100%; margin-top: 6px; font-family: var(--rt-verb);
+	font-size: 13px; line-height: 1; color: #fff; background: var(--rt-red); border: 1px solid var(--rt-blood);
+	padding: 4px 0; cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,.55); }
+
+/* totem */
+#rcd-dock .rcd-totem { position: relative; width: 132px; flex: none; align-self: flex-end; display: flex;
+	flex-direction: column; align-items: center; justify-content: center; padding: 8px 8px 9px; margin-bottom: 2px;
+	background: var(--rt-panel); border: 1px solid var(--rt-blood); box-shadow: 4px 4px 0 rgba(0,0,0,.55);
+	clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px),
+		calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
+#rcd-dock .rcd-round-label { font-family: var(--rt-mono); font-size: 8px; font-weight: 600; letter-spacing: .2em;
+	text-transform: uppercase; color: var(--rt-muted); }
+#rcd-dock .rcd-round-label b { font-family: var(--rt-disp); font-weight: 900; font-size: 20px; line-height: 1;
+	color: #fff; text-shadow: 2px 2px 0 var(--rt-blood); vertical-align: -3px; margin-left: 3px; }
+#rcd-dock .rcd-faction { font-family: var(--rt-verb); font-size: 16px; line-height: 1.25; color: #e0344a;
+	letter-spacing: .04em; text-shadow: 1px 1px 0 rgba(7,4,5,.8); margin-top: 2px; }
+#rcd-dock .rcd-totem-note { font-family: var(--rt-mono); font-size: 7.5px; letter-spacing: .1em;
+	text-transform: uppercase; color: var(--rt-muted); margin-top: 3px; text-align: center; }
+
+/* party surface collapse while the dock holds the top of the screen */
+.rcd-collapsed { display: none !important; }
