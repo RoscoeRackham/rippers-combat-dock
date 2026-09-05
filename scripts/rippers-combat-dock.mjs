@@ -262,8 +262,8 @@ export function renderDock() {
 		dockEl.id = 'rcd-dock';
 		dockEl.addEventListener('click', onCardAction);
 		document.body.appendChild(dockEl);
-		collapsePartySurfaces();
 	}
+	collapsePartySurfaces(); // re-scan every render — a party surface may appear after the dock opens
 	dockEl.innerHTML = dockHTML(buildLiveVM(combat));
 }
 
@@ -273,8 +273,11 @@ export function closeDock() {
 }
 
 function collapsePartySurfaces() {
-	collapsedSurfaces = findPartySurfaces(document).filter((el) => !el.classList.contains('rcd-collapsed'));
-	for (const el of collapsedSurfaces) el.classList.add('rcd-collapsed');
+	for (const el of findPartySurfaces(document)) {
+		if (el.classList.contains('rcd-collapsed')) continue;
+		el.classList.add('rcd-collapsed');
+		collapsedSurfaces.push(el);
+	}
 }
 function restorePartySurfaces() {
 	for (const el of collapsedSurfaces) el.classList.remove('rcd-collapsed');
@@ -311,8 +314,18 @@ if (globalThis.Hooks?.on) {
 	for (const h of ['createCombat', 'updateCombat', 'updateCombatant', 'createCombatant', 'deleteCombatant']) {
 		Hooks.on(h, () => renderDock());
 	}
-	Hooks.on('deleteCombat', () => closeDock());
+	Hooks.on('deleteCombat', () => {
+		// close only when no OTHER active combat remains (the hook fires per deleted document)
+		setTimeout(() => (game.combat?.started ? renderDock() : closeDock()), 0);
+	});
 	Hooks.on('updateActor', (actor) => {
 		if (game.combat?.started && game.combat.combatants.some((c) => c.actor?.id === actor.id)) renderDock();
 	});
+	// status toggles (stagger included) arrive as ActiveEffect create/delete, NOT updateActor
+	for (const h of ['createActiveEffect', 'deleteActiveEffect', 'updateActiveEffect']) {
+		Hooks.on(h, (effect) => {
+			const actorId = effect?.parent?.id;
+			if (game.combat?.started && game.combat.combatants.some((c) => c.actor?.id === actorId)) renderDock();
+		});
+	}
 }

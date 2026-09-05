@@ -113,3 +113,30 @@ test('findPartySurfaces: feature-detects known selectors, dedupes, tolerates no 
 	const fakeRoot = { querySelectorAll: (sel) => (sel === '#sah-party' || sel === '.sah-party-hud' ? [el] : []) };
 	assert.deepEqual(findPartySurfaces(fakeRoot), [el]); // matched twice, listed once
 });
+
+// ── source-shape guards (hard-won runtime facts) ─────────────────────────────
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+const src = readFileSync(fileURLToPath(new URL('../scripts/rippers-combat-dock.mjs', import.meta.url)), 'utf8');
+
+test('GUARD: turn routes only through the FU public paths — never core nextTurn/endTurn directly', () => {
+	assert.match(src, /ui\?\.combat\?\.handleStartTurn/);
+	assert.match(src, /ui\?\.combat\?\.handleEndTurn/);
+	assert.doesNotMatch(src, /combat\.nextTurn\(|combat\.endTurn\(|combat\.startTurn\(/);
+});
+
+test('GUARD: status toggles are ActiveEffect create/delete, not updateActor — the dock listens to both', () => {
+	assert.match(src, /createActiveEffect/);
+	assert.match(src, /deleteActiveEffect/);
+	assert.match(src, /updateActor/);
+});
+
+test('GUARD: party collapse re-scans every render and never hard-depends on one HUD', () => {
+	assert.match(src, /collapsePartySurfaces\(\); \/\/ re-scan every render/);
+	assert.doesNotMatch(src, /relationships[\s\S]*stylish-hud/);
+});
+
+test('GUARD: no untyped <button> in generated dock HTML (the Full-Rest reload lesson)', () => {
+	const buttons = src.match(/<button(?![^>]*type="button")[^>]*>/g) ?? [];
+	assert.equal(buttons.length, 0, `untyped buttons: ${buttons.join(' | ')}`);
+});
