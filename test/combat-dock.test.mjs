@@ -39,8 +39,8 @@ test('staggerVisible: ENEMY-ONLY (ruled) — a staggered ally never shows it on 
 });
 
 test('factionLabel: natural case, never all-caps (Pirata law)', () => {
-	assert.equal(factionLabel('friendly'), 'Allies act');
-	assert.equal(factionLabel('hostile'), 'Enemies act');
+	assert.equal(factionLabel('friendly'), 'Rippers Turn'); // ruled label (Austin, 5 Sep 2026)
+	assert.equal(factionLabel('hostile'), 'Enemy Turn');
 	assert.equal(factionLabel(undefined), 'The table decides');
 	for (const v of ['friendly', 'hostile', undefined]) assert.doesNotMatch(factionLabel(v), /^[A-Z\s]+$/);
 });
@@ -59,7 +59,7 @@ test('dockVM: splits factions, veils enemy vitals for players, GM sees through',
 	assert.equal(player.allies.length, 1);
 	assert.equal(player.enemies.length, 2);
 	assert.equal(player.round, 3);
-	assert.equal(player.factionLine, 'Allies act');
+	assert.equal(player.factionLine, 'Rippers Turn');
 	assert.equal(player.allies[0].hp.value, 10);                    // ally vitals always
 	assert.equal(player.allies[0].guise, 'The Pale Coachman');      // guise tag rides ally cards
 	assert.equal(player.enemies[0].hp, null);                       // unstudied enemy → veiled

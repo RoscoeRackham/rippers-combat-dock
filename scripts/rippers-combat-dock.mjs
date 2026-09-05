@@ -61,10 +61,13 @@ export function staggerVisible({ enemy = false, staggered = false } = {}) {
 	return enemy && staggered;
 }
 
-/** Totem faction line — Pirata face, natural case, never all-caps. */
+/**
+ * Totem faction line — Pirata face, natural case, never all-caps (no CSS uppercasing).
+ * RULED (Austin, 5 Sep 2026, superseding all prior label text): 'Rippers Turn' / 'Enemy Turn'.
+ */
 export function factionLabel(currentTurn) {
-	if (currentTurn === 'friendly') return 'Allies act';
-	if (currentTurn === 'hostile') return 'Enemies act';
+	if (currentTurn === 'friendly') return 'Rippers Turn';
+	if (currentTurn === 'hostile') return 'Enemy Turn';
 	return 'The table decides';
 }
 
