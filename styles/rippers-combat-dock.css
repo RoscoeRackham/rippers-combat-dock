@@ -102,8 +102,6 @@
 	color: #fff; text-shadow: 2px 2px 0 var(--rt-blood); vertical-align: -3px; margin-left: 3px; }
 #rcd-dock .rcd-faction { font-family: var(--rt-verb); font-size: 16px; line-height: 1.25; color: #e0344a;
 	letter-spacing: .04em; text-shadow: 1px 1px 0 rgba(7,4,5,.8); margin-top: 2px; }
-#rcd-dock .rcd-totem-note { font-family: var(--rt-mono); font-size: 7.5px; letter-spacing: .1em;
-	text-transform: uppercase; color: var(--rt-muted); margin-top: 3px; text-align: center; }
 
 /* party surface collapse while the dock holds the top of the screen */
 .rcd-collapsed { display: none !important; }

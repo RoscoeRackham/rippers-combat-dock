@@ -214,7 +214,6 @@ function dockHTML(vm) {
 		<div class="rcd-totem">
 			<span class="rcd-round-label">${i18n('RCD.Dock.Round', 'Round')} <b>${vm.round}</b></span>
 			<span class="rcd-faction">${vm.factionLine}</span>
-			<span class="rcd-totem-note">${i18n('RCD.Dock.NoQueue', 'The table selects — no initiative')}</span>
 		</div>
 		<div class="rcd-flank rcd-enemies">
 			<div class="rcd-flank-head">${i18n('RCD.Dock.Enemies', 'Enemies')}</div>
