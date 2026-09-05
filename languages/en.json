@@ -16,5 +16,7 @@
   "RCD.Ctl.Eye": "GM — override the Study gate",
   "RCD.Ctl.Studied": "Toggle studied",
   "RCD.Settings.ShowVitals": "Show vitals bars",
-  "RCD.Settings.ShowVitalsHint": "Display HP and MP bars on dock cards. The Study gate on enemy vitals still applies — this only hides what you could already see."
+  "RCD.Settings.ShowVitalsHint": "Display HP and MP bars on dock cards. The Study gate on enemy vitals still applies — this only hides what you could already see.",
+  "RCD.Settings.ShowTurnMarker": "Show the canvas turn marker",
+  "RCD.Settings.ShowTurnMarkerHint": "Ring the acting combatant's token on the canvas — a blood halo for the Rippers, a bone-iron one for enemies, with the turn caption beneath. Turn it off to keep the map clean."
 }

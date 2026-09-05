@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const cd = await import('../scripts/rippers-combat-dock.mjs');
-const { studyReveals, cardState, vitalsVisible, staggerVisible, factionLabel, dockVM, findPartySurfaces, STUDY_REVEAL_THRESHOLD } = cd;
+const { studyReveals, cardState, vitalsVisible, staggerVisible, factionLabel, turnMarkerState, dockVM, findPartySurfaces, STUDY_REVEAL_THRESHOLD } = cd;
 
 test('studyReveals: the ruled 7+ gate (core p.319) — 6 veils, 7 reveals, garbage veils', () => {
 	assert.equal(STUDY_REVEAL_THRESHOLD, 7);
@@ -43,6 +43,35 @@ test('factionLabel: natural case, never all-caps (Pirata law)', () => {
 	assert.equal(factionLabel('hostile'), 'Enemy Turn');
 	assert.equal(factionLabel(undefined), null); // ruled: the undetermined state shows nothing
 	for (const v of ['friendly', 'hostile']) assert.doesNotMatch(factionLabel(v), /^[A-Z\s]+$/);
+});
+
+test('turnMarkerState: ally/enemy variants, captions mirror the totem, stagger enemy-only', () => {
+	// no acting combatant, or unknown faction → nothing draws
+	assert.equal(turnMarkerState({ acting: false, faction: 'friendly' }), null);
+	assert.equal(turnMarkerState({ acting: true, faction: null }), null);
+	// ally
+	const ally = turnMarkerState({ acting: true, faction: 'friendly' });
+	assert.equal(ally.variant, 'ally');
+	assert.equal(ally.caption, 'Rippers Turn'); // === factionLabel('friendly')
+	assert.equal(ally.sweep, true);
+	assert.equal(ally.staggered, false);
+	// enemy
+	const enemy = turnMarkerState({ acting: true, faction: 'hostile' });
+	assert.equal(enemy.variant, 'enemy');
+	assert.equal(enemy.caption, 'Enemy Turn');
+	assert.equal(enemy.sweep, true);
+	// staggered is ENEMY-ONLY (ruled): a staggered ally is NOT staggered, keeps its sweep + caption
+	const stagAlly = turnMarkerState({ acting: true, faction: 'friendly', staggered: true });
+	assert.equal(stagAlly.staggered, false);
+	assert.equal(stagAlly.sweep, true);
+	assert.equal(stagAlly.caption, 'Rippers Turn');
+	// staggered enemy: dead ring (no sweep), 'Loses the turn'
+	const stagEnemy = turnMarkerState({ acting: true, faction: 'hostile', staggered: true });
+	assert.equal(stagEnemy.staggered, true);
+	assert.equal(stagEnemy.sweep, false);
+	assert.equal(stagEnemy.caption, 'Loses the turn');
+	// captions never all-caps (Pirata law)
+	for (const s of [ally, enemy, stagEnemy]) assert.doesNotMatch(s.caption, /^[A-Z\s]+$/);
 });
 
 const row = (o = {}) => ({ id: 'x', name: 'X', faction: 'friendly', defeated: false, staggered: false,

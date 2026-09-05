@@ -105,3 +105,81 @@
 
 /* party surface collapse while the dock holds the top of the screen */
 .rcd-collapsed { display: none !important; }
+
+/* ═══ TURN MARKER (v0.2.0) — under-token halo for the acting combatant ═══
+   Design of record: ui_kits/unmasked-surfaces/turn-marker r1 (Austin-approved).
+   Positioned by JS at the token's screen centre; every dimension scales off
+   --tm-size (the token's zoomed size) so it holds at any zoom. Ally = blood ring
+   + cardinal ticks + skewed Pirata pill; enemy = dashed bone-iron sibling; staggered
+   (enemy-only) = dead-grey ring, ribbon, 'Loses the turn', sweep stopped. Pirata
+   natural case, NO text-transform (register law). */
+#rcd-turn-marker {
+	--tm-size: 150px;
+	--tm-red: #c8102a; --tm-blood: #4a1a22; --tm-iron: #b9a894;
+	--tm-cream: #e8dccb; --tm-bone: #c9b8a8;
+	--rt-verb: 'Pirata One', 'Grenze Gotisch', serif;
+	position: absolute; width: 0; height: 0; z-index: 70; pointer-events: none;
+}
+#rcd-turn-marker .rcd-tm-ringwrap {
+	position: absolute; left: 0; top: 0; width: var(--tm-size); height: var(--tm-size);
+	transform: translate(-50%, -50%);
+}
+#rcd-turn-marker .rcd-tm-ring { position: absolute; inset: 0; border-radius: 50%; }
+/* ally — blood */
+.rcd-tm-ally .rcd-tm-ring.outer {
+	border: calc(var(--tm-size) * .02) solid var(--tm-red);
+	box-shadow: 0 0 calc(var(--tm-size) * .12) rgba(200,16,42,.4), inset 0 0 calc(var(--tm-size) * .093) rgba(200,16,42,.22);
+}
+.rcd-tm-ally .rcd-tm-ring.inner { inset: calc(var(--tm-size) * .073); border: 1px solid rgba(200,16,42,.5); }
+/* enemy — bone-iron sibling */
+.rcd-tm-enemy .rcd-tm-ring.outer {
+	border: calc(var(--tm-size) * .02) dashed var(--tm-iron);
+	box-shadow: 0 0 calc(var(--tm-size) * .093) rgba(185,168,148,.22), inset 0 0 calc(var(--tm-size) * .08) rgba(0,0,0,.5);
+}
+.rcd-tm-enemy .rcd-tm-ring.inner { inset: calc(var(--tm-size) * .073); border: 1px solid rgba(185,168,148,.35); }
+/* sweep — one slow conic rotation; ally 5.5s CW, enemy 8s CCW; no pulse/bounce */
+#rcd-turn-marker .rcd-tm-sweep {
+	position: absolute; inset: calc(var(--tm-size) * -.013); border-radius: 50%;
+	-webkit-mask: radial-gradient(circle, transparent 44%, #000 45.4%);
+	mask: radial-gradient(circle, transparent 44%, #000 45.4%);
+	animation: rcd-tm-sweep 5.5s linear infinite;
+}
+.rcd-tm-ally .rcd-tm-sweep { background: conic-gradient(from 0deg, rgba(200,16,42,.55), rgba(200,16,42,0) 32%, rgba(200,16,42,0) 100%); }
+.rcd-tm-enemy .rcd-tm-sweep {
+	background: conic-gradient(from 0deg, rgba(185,168,148,.45), rgba(185,168,148,0) 26%, rgba(185,168,148,0) 100%);
+	animation-duration: 8s; animation-direction: reverse;
+}
+@keyframes rcd-tm-sweep { to { transform: rotate(360deg); } }
+/* cardinal ticks — the angular register cue, readable when small */
+#rcd-turn-marker .rcd-tm-tick { position: absolute; background: var(--tm-red); }
+.rcd-tm-enemy .rcd-tm-tick { background: var(--tm-iron); }
+.rcd-tm-tick.t, .rcd-tm-tick.b { width: calc(var(--tm-size) * .107); height: calc(var(--tm-size) * .02); left: 50%; transform: translateX(-50%); }
+.rcd-tm-tick.l, .rcd-tm-tick.r { height: calc(var(--tm-size) * .107); width: calc(var(--tm-size) * .02); top: 50%; transform: translateY(-50%); }
+.rcd-tm-enemy .rcd-tm-tick.t, .rcd-tm-enemy .rcd-tm-tick.b { width: calc(var(--tm-size) * .147); height: calc(var(--tm-size) * .033); }
+.rcd-tm-enemy .rcd-tm-tick.l, .rcd-tm-enemy .rcd-tm-tick.r { height: calc(var(--tm-size) * .147); width: calc(var(--tm-size) * .033); }
+.rcd-tm-tick.t { top: calc(var(--tm-size) * -.013); }
+.rcd-tm-tick.b { bottom: calc(var(--tm-size) * -.013); }
+.rcd-tm-tick.l { left: calc(var(--tm-size) * -.013); }
+.rcd-tm-tick.r { right: calc(var(--tm-size) * -.013); }
+/* caption pill — skewed red slab, Pirata natural case, label counter-skewed flat */
+#rcd-turn-marker .rcd-tm-cap { position: absolute; left: 0; top: calc(var(--tm-size) * .55); transform: translateX(-50%); text-align: center; }
+#rcd-turn-marker .rcd-tm-cap b {
+	display: inline-block; font-family: var(--rt-verb); font-weight: 400; line-height: 1.2;
+	font-size: calc(var(--tm-size) * .127); color: #fff; background: var(--tm-red);
+	border: 1px solid var(--tm-blood); padding: calc(var(--tm-size) * .013) calc(var(--tm-size) * .08);
+	transform: skewX(-10deg); box-shadow: 3px 3px 0 rgba(0,0,0,.55); white-space: nowrap;
+}
+#rcd-turn-marker .rcd-tm-cap b span { display: inline-block; transform: skewX(10deg); }
+.rcd-tm-enemy .rcd-tm-cap b { background: #241a14; border-color: var(--tm-iron); color: var(--tm-cream); }
+/* staggered (enemy-only, ruled) — dead grey ring, sweep gone, ribbon, muted pill */
+.rcd-tm-staggered .rcd-tm-ring.outer { border-color: #6b5f52; box-shadow: none; }
+.rcd-tm-staggered .rcd-tm-cap b { background: #1a0e12; border-color: var(--tm-blood); color: var(--tm-bone); }
+#rcd-turn-marker .rcd-tm-ribbon {
+	position: absolute; left: calc(var(--tm-size) * -.1); right: calc(var(--tm-size) * -.1); top: 44%;
+	transform: rotate(-14deg); background: var(--tm-red); border: 1px solid var(--tm-blood);
+	box-shadow: 0 2px 0 rgba(0,0,0,.5); text-align: center; padding: calc(var(--tm-size) * .013) 0;
+}
+#rcd-turn-marker .rcd-tm-ribbon > span {
+	font-family: var(--rt-verb); font-size: calc(var(--tm-size) * .1); color: #fff;
+	letter-spacing: .05em; text-shadow: 1px 1px 0 rgba(7,4,5,.8);
+}

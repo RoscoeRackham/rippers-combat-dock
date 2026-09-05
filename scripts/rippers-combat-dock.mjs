@@ -73,6 +73,29 @@ export function factionLabel(currentTurn) {
 }
 
 /**
+ * Canvas turn-marker state for the ACTING combatant (design of record:
+ * ui_kits/unmasked-surfaces/turn-marker r1, Austin-approved). Pure — no Foundry docs.
+ *  - No acting combatant, or an unknown faction ⇒ null (nothing draws; a non-acting
+ *    token gets NO marker, ruled).
+ *  - Ally (friendly) = blood ring + sweep + 'Rippers Turn'. Enemy (hostile) = bone-iron
+ *    sibling + 'Enemy Turn'.
+ *  - Stagger is honoured ENEMY-ONLY (ruled, mirrors the dock): the ring drops to dead grey,
+ *    the sweep stops, and the caption reads 'Loses the turn'. An ally never shows a staggered
+ *    marker. Captions mirror the dock totem exactly (factionLabel) — one ruled label set.
+ */
+export function turnMarkerState({ acting = false, faction = null, staggered = false } = {}) {
+	if (!acting || (faction !== 'friendly' && faction !== 'hostile')) return null;
+	const enemy = faction === 'hostile';
+	const isStaggered = enemy && !!staggered; // enemy-only (ruled)
+	return {
+		variant: enemy ? 'enemy' : 'ally',
+		staggered: isStaggered,
+		sweep: !isStaggered,                                // staggered + non-acting carry no sweep
+		caption: isStaggered ? 'Loses the turn' : factionLabel(faction),
+	};
+}
+
+/**
  * The dock VM from plain data (one combatant row shape, no Foundry documents):
  * rows: {id, name, img, faction:'friendly'|'hostile', defeated, staggered, studied, gmReveal,
  *        hidden, isOwner, hp:{value,max}|null, mp:{value,max}|null, guise|null, turnsTaken, totalTurns}
@@ -271,11 +294,13 @@ export function renderDock() {
 	}
 	collapsePartySurfaces(); // re-scan every render — a party surface may appear after the dock opens
 	dockEl.innerHTML = dockHTML(buildLiveVM(combat));
+	updateTurnMarker(); // the acting combatant's canvas marker rides the same refresh
 }
 
 export function closeDock() {
 	if (dockEl) { dockEl.remove(); dockEl = null; }
 	restorePartySurfaces();
+	removeTurnMarker();
 }
 
 function collapsePartySurfaces() {
@@ -288,6 +313,100 @@ function collapsePartySurfaces() {
 function restorePartySurfaces() {
 	for (const el of collapsedSurfaces) el.classList.remove('rcd-collapsed');
 	collapsedSurfaces = [];
+}
+
+// ── the canvas turn marker (HTML overlay that haloes the acting token) ─────────
+// WHY HTML, not PIXI: the marker is the approved HTML/CSS mock — a skewed Pirata
+// caption pill and a conic-gradient sweep that PIXI can't reproduce faithfully. The
+// ring is LARGER than the token art, so as a halo it reads correctly and never
+// obscures the token (the mock's own rule). We position an overlay in #hud (which
+// sits over the board at the canvas origin) at the token's screen centre and track
+// canvasPan/refreshToken. It touches no token document — pure visual.
+let markerEl = null;
+
+function ensureMarkerEl() {
+	if (markerEl?.isConnected) return markerEl;
+	markerEl = document.createElement('div');
+	markerEl.id = 'rcd-turn-marker';
+	markerEl.setAttribute('aria-hidden', 'true');
+	(document.getElementById('hud') ?? document.body).appendChild(markerEl);
+	return markerEl;
+}
+
+export function removeTurnMarker() {
+	if (markerEl) { markerEl.remove(); markerEl = null; }
+}
+
+/** The acting combatant's marker model + its live token placeable, or null. */
+function actingMarkerModel(combat) {
+	const c = combat?.combatant;
+	if (!c) return null;
+	const turn = combat.getCurrentTurn?.() ?? null;
+	const faction = c.faction ?? (turn === 'hostile' ? 'hostile' : turn === 'friendly' ? 'friendly' : null);
+	const staggered = !!c.actor?.statuses?.has?.(STAGGER_STATUS_ID);
+	const state = turnMarkerState({ acting: true, faction, staggered });
+	if (!state) return null;
+	return { ...state, tokenDoc: c.token ?? null }; // the TokenDocument — geometry works even if the placeable isn't drawn
+}
+
+function markerInnerHTML(model) {
+	const esc = globalThis.foundry?.utils?.escapeHTML ?? ((s) => String(s ?? ''));
+	const ribbon = model.staggered
+		? `<span class="rcd-tm-ribbon"><span>${i18n('RCD.Card.Staggered', 'Staggered')}</span></span>` : '';
+	const sweep = model.sweep ? '<span class="rcd-tm-sweep"></span>' : '';
+	return `<span class="rcd-tm-ringwrap">
+			<span class="rcd-tm-ring outer"></span><span class="rcd-tm-ring inner"></span>${sweep}
+			<span class="rcd-tm-tick t"></span><span class="rcd-tm-tick b"></span>
+			<span class="rcd-tm-tick l"></span><span class="rcd-tm-tick r"></span>${ribbon}
+		</span>
+		<span class="rcd-tm-cap"><b><span>${esc(model.caption)}</span></b></span>`;
+}
+
+/** Place the overlay at the token's on-screen centre, scaled to the token's zoomed size.
+ * Geometry comes from the TokenDocument (always present); the live placeable is used when
+ * it is drawn (exact), else we fall back to the document's x/y/width — so no flash if the
+ * placeable is momentarily absent, and it still works on an undrawn canvas. */
+function positionMarker(el, tokenDoc) {
+	const stage = globalThis.canvas?.stage;
+	if (!stage?.worldTransform || !tokenDoc) { el.style.display = 'none'; return; }
+	const grid = globalThis.canvas?.grid?.size ?? globalThis.canvas?.dimensions?.size ?? 100;
+	const obj = tokenDoc.object ?? null;
+	const wWorld = obj?.w ?? (tokenDoc.width ?? 1) * grid;
+	const cx = obj?.center?.x ?? (tokenDoc.x + wWorld / 2);
+	const cy = obj?.center?.y ?? (tokenDoc.y + ((tokenDoc.height ?? 1) * grid) / 2);
+	const p = stage.worldTransform.apply({ x: cx, y: cy });
+	const scale = stage.scale?.x ?? 1;
+	const size = Math.max(24, wWorld * scale * 1.44); // ring ≈ 1.44× token art (150/104)
+	el.style.display = '';
+	el.style.setProperty('--tm-size', `${size}px`);
+	el.style.left = `${p.x}px`;
+	el.style.top = `${p.y}px`;
+}
+
+/** Full update — rebuild inner only when the state signature changes, then reposition. */
+export function updateTurnMarker() {
+	const g = RT()?.game;
+	const combat = g?.combat;
+	let enabled = true; // default on; tolerate the setting not being registered yet (init-order safety)
+	try { enabled = g?.settings?.get?.(MODULE_ID, 'showTurnMarker') ?? true; } catch { enabled = true; }
+	if (!enabled || !combat?.started || !globalThis.canvas?.ready) return removeTurnMarker();
+	const model = actingMarkerModel(combat);
+	if (!model || !model.tokenDoc) return removeTurnMarker();
+	const el = ensureMarkerEl();
+	const sig = `${model.variant}|${model.staggered}|${model.caption}`;
+	if (el.dataset.sig !== sig) {
+		el.dataset.sig = sig;
+		el.className = `rcd-tm rcd-tm-${model.variant}${model.staggered ? ' rcd-tm-staggered' : ''}`;
+		el.innerHTML = markerInnerHTML(model);
+	}
+	positionMarker(el, model.tokenDoc);
+}
+
+/** Cheap reposition of the existing marker (pan/zoom/token move) — no rebuild. */
+function repositionTurnMarker() {
+	if (!markerEl) return;
+	const tokenDoc = RT()?.game?.combat?.combatant?.token;
+	if (tokenDoc && globalThis.canvas?.ready) positionMarker(markerEl, tokenDoc);
 }
 
 // ── api: Study integration hook-point ────────────────────────────────────────
@@ -310,12 +429,22 @@ if (globalThis.Hooks?.on) {
 			scope: 'client', config: true, type: Boolean, default: true,
 			onChange: () => renderDock(),
 		});
+		game.settings.register(MODULE_ID, 'showTurnMarker', {
+			name: 'RCD.Settings.ShowTurnMarker',
+			hint: 'RCD.Settings.ShowTurnMarkerHint',
+			scope: 'client', config: true, type: Boolean, default: true,
+			onChange: () => updateTurnMarker(),
+		});
 	});
 	Hooks.once('ready', () => {
 		const mod = game.modules.get(MODULE_ID);
-		if (mod) mod.api = { renderDock, closeDock, applyStudyResult, studyReveals, dockVM, cardState, vitalsVisible, staggerVisible, factionLabel };
+		if (mod) mod.api = { renderDock, closeDock, applyStudyResult, studyReveals, dockVM, cardState, vitalsVisible, staggerVisible, factionLabel, turnMarkerState, updateTurnMarker, removeTurnMarker };
 		if (game.combat?.started) renderDock(); // auto-open on an already-active combat
 	});
+	// the canvas turn marker follows pan/zoom, token movement, and a (re)drawn canvas
+	Hooks.on('canvasPan', () => repositionTurnMarker());
+	Hooks.on('canvasReady', () => updateTurnMarker());
+	Hooks.on('refreshToken', () => repositionTurnMarker());
 	// auto-open / live refresh / auto-close
 	for (const h of ['createCombat', 'updateCombat', 'updateCombatant', 'createCombatant', 'deleteCombatant']) {
 		Hooks.on(h, () => renderDock());
