@@ -236,7 +236,7 @@ async function onCardAction(ev) {
 		ev.stopPropagation();
 		if (ctl === 'defeated' && g.user.isGM) return combatant.update({ defeated: !combatant.isDefeated });
 		if (ctl === 'hidden' && g.user.isGM) return combatant.update({ hidden: !combatant.hidden });
-		if (ctl === 'ping' && combatant.token?.object) return canvas?.ping?.(combatant.token.object.center);
+		if (ctl === 'ping' && combatant.token?.object) return globalThis.canvas?.ping?.(combatant.token.object.center);
 		if (ctl === 'eye' && g.user.isGM) return combatant.setFlag(MODULE_ID, 'gmReveal', !combatant.getFlag(MODULE_ID, 'gmReveal'));
 		if (ctl === 'studied' && g.user.isGM) return combatant.setFlag(MODULE_ID, 'studied', !combatant.getFlag(MODULE_ID, 'studied'));
 		return;
