@@ -41,8 +41,8 @@ test('staggerVisible: ENEMY-ONLY (ruled) — a staggered ally never shows it on 
 test('factionLabel: natural case, never all-caps (Pirata law)', () => {
 	assert.equal(factionLabel('friendly'), 'Rippers Turn'); // ruled label (Austin, 5 Sep 2026)
 	assert.equal(factionLabel('hostile'), 'Enemy Turn');
-	assert.equal(factionLabel(undefined), 'The table decides');
-	for (const v of ['friendly', 'hostile', undefined]) assert.doesNotMatch(factionLabel(v), /^[A-Z\s]+$/);
+	assert.equal(factionLabel(undefined), null); // ruled: the undetermined state shows nothing
+	for (const v of ['friendly', 'hostile']) assert.doesNotMatch(factionLabel(v), /^[A-Z\s]+$/);
 });
 
 const row = (o = {}) => ({ id: 'x', name: 'X', faction: 'friendly', defeated: false, staggered: false,

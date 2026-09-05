@@ -63,12 +63,13 @@ export function staggerVisible({ enemy = false, staggered = false } = {}) {
 
 /**
  * Totem faction line — Pirata face, natural case, never all-caps (no CSS uppercasing).
- * RULED (Austin, 5 Sep 2026, superseding all prior label text): 'Rippers Turn' / 'Enemy Turn'.
+ * RULED (Austin, 5 Sep 2026, superseding all prior label text): 'Rippers Turn' / 'Enemy Turn',
+ * and the undetermined state shows NOTHING (null — the totem tightens, no placeholder).
  */
 export function factionLabel(currentTurn) {
 	if (currentTurn === 'friendly') return 'Rippers Turn';
 	if (currentTurn === 'hostile') return 'Enemy Turn';
-	return 'The table decides';
+	return null;
 }
 
 /**
@@ -216,7 +217,7 @@ function dockHTML(vm) {
 		</div>
 		<div class="rcd-totem">
 			<span class="rcd-round-label">${i18n('RCD.Dock.Round', 'Round')} <b>${vm.round}</b></span>
-			<span class="rcd-faction">${vm.factionLine}</span>
+			${vm.factionLine ? `<span class="rcd-faction">${vm.factionLine}</span>` : ''}
 		</div>
 		<div class="rcd-flank rcd-enemies">
 			<div class="rcd-flank-head">${i18n('RCD.Dock.Enemies', 'Enemies')}</div>
