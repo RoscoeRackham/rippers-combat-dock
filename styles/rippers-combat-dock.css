@@ -15,7 +15,12 @@
 	border-top: 2px solid var(--rt-red);
 	font-family: var(--rt-mono);
 }
-#rcd-dock .rcd-inner { display: flex; gap: 18px; align-items: flex-end; justify-content: center; pointer-events: auto; }
+/* pointer-events: the container AND the inner row pass clicks THROUGH (so Foundry's top
+   chrome — #navigation etc. — stays clickable through the dock's empty band); only the
+   interactive leaves (cards + totem, whose buttons inherit) capture. Fixes: the dock top
+   chrome covered Foundry's top UI and blocked clicks (Austin, live). */
+#rcd-dock .rcd-inner { display: flex; gap: 18px; align-items: flex-end; justify-content: center; pointer-events: none; }
+#rcd-dock .rcd-card, #rcd-dock .rcd-totem { pointer-events: auto; }
 #rcd-dock .rcd-flank { flex: 1 1 0; min-width: 0; }
 #rcd-dock .rcd-flank-head { font-family: var(--rt-mono); font-size: 9px; font-weight: 600; letter-spacing: .14em;
 	color: var(--rt-bone-dim); margin-bottom: 6px; }
