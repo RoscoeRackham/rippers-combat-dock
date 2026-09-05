@@ -246,8 +246,11 @@ async function onCardAction(ev) {
 		// THE route: FU's own public end-turn path — never core advance (which FU overrides away).
 		return globalThis.ui?.combat?.handleEndTurn?.(combatant);
 	}
-	// Click selects the actor — and in FU, selection IS the turn choice.
-	combatant.token?.object?.control?.({ releaseOthers: true });
+	// Click selects the actor — and in FU, selection IS the turn choice. Token control is
+	// best-effort: only on a drawn canvas (an undrawn canvas throws deep in core PIXI code).
+	if (globalThis.canvas?.ready) {
+		try { combatant.token?.object?.control?.({ releaseOthers: true }); } catch { /* canvas edge — selection is cosmetic */ }
+	}
 	if (cardEl.dataset.canAct === 'true' && !combat.isTurnStarted) {
 		return globalThis.ui?.combat?.handleStartTurn?.(combatant);
 	}
