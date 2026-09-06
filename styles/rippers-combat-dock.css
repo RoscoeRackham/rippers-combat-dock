@@ -129,6 +129,18 @@
 	line-height: 1; color: #fff; background: var(--rt-red); border: 1px solid var(--rt-blood);
 	padding: 3px 0; cursor: pointer; text-align: center; }
 #rcd-dock .rcd-tile-end:hover { filter: brightness(.92); }
+/* Compact nameplate: always visible on the acting tile, hover-only on others. Bone ink, natural case. */
+#rcd-dock .rcd-tile-name { display: none; width: 52px; max-width: 52px; box-sizing: border-box;
+	font-family: var(--rt-mono); font-size: 8px; font-weight: 600; letter-spacing: .05em;
+	color: var(--rt-bone-dim); text-align: center; padding: 1px 3px;
+	white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#rcd-dock .rcd-tile.rcd-state-active .rcd-tile-name { display: block; color: var(--rt-cream); }
+#rcd-dock .rcd-tile:hover .rcd-tile-name { display: block; }
+/* GM hover strip: eye/study/defeated controls in portrait mode. Hidden until hover. */
+#rcd-dock .rcd-tile-gm { display: none; position: absolute; top: 0; left: 0; right: 0;
+	justify-content: center; gap: 2px; padding: 2px; background: rgba(7,4,5,.82); }
+#rcd-dock .rcd-tile:hover .rcd-tile-gm { display: flex; }
+#rcd-dock .rcd-tile-gm .rcd-ctl { width: 18px; height: 18px; font-size: 10px; }
 
 /* party surface collapse while the dock holds the top of the screen */
 .rcd-collapsed { display: none !important; }

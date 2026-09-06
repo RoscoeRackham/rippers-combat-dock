@@ -250,29 +250,37 @@ function dockHTML(vm) {
 }
 
 // ── portrait mode (default) ───────────────────────────────────────────────
-function portraitCardHTML(c) {
+function portraitCardHTML(c, isGM) {
 	const esc = globalThis.foundry?.utils?.escapeHTML ?? ((s) => String(s ?? ''));
 	const stagger = c.stagger
 		? `<div class="rcd-ribbon"><span>${i18n('RCD.Card.Staggered', 'Staggered')}</span></div>` : '';
 	const endBtn = c.canEnd
 		? `<button type="button" class="rcd-tile-end" data-end>${i18n('RCD.Card.EndTurn', 'End the turn')}</button>` : '';
-	return `<div class="rcd-tile rcd-state-${c.state}" data-combatant="${esc(c.id)}" data-can-act="${c.canAct}">
+	// GM hover strip: Study gate (eye + studied) for enemies; defeated for all. Minimal — no hidden toggle
+	// (that belongs in the full-card mode; portrait mode sheds chrome, not critical GM actions).
+	const gmStrip = isGM ? `<div class="rcd-tile-gm">
+		${c.enemy ? `<button type="button" class="rcd-ctl rcd-ctl-eye${c.gmReveal ? ' rcd-on' : ''}" data-ctl="eye" title="${esc(i18n('RCD.Ctl.Eye', 'GM — override Study gate'))}">&#x25C9;</button>` : ''}
+		${c.enemy ? `<button type="button" class="rcd-ctl rcd-ctl-study${c.studied ? ' rcd-on' : ''}" data-ctl="studied" title="${esc(i18n('RCD.Ctl.Studied', 'Toggle studied'))}">&#x2315;</button>` : ''}
+		<button type="button" class="rcd-ctl" data-ctl="defeated" title="${esc(i18n('RCD.Ctl.Defeated', 'Toggle defeated'))}">&#x2620;&#xFE0E;</button>
+	</div>` : '';
+	return `<div class="rcd-tile rcd-state-${c.state}" title="${esc(c.name)}" data-combatant="${esc(c.id)}" data-can-act="${c.canAct}">
 		<div class="rcd-tile-port">${c.img ? `<img src="${esc(c.img)}" alt="">` : ''}${stagger}</div>
-		${endBtn}
+		<span class="rcd-tile-name">${esc(c.name)}</span>
+		${gmStrip}${endBtn}
 	</div>`;
 }
 
 function portraitDockHTML(vm) {
 	return `<div class="rcd-inner rcd-inner-portraits">
 		<div class="rcd-flank rcd-allies">
-			<div class="rcd-cards">${vm.allies.map((c) => portraitCardHTML(c)).join('')}</div>
+			<div class="rcd-cards">${vm.allies.map((c) => portraitCardHTML(c, vm.isGM)).join('')}</div>
 		</div>
 		<div class="rcd-totem">
 			<span class="rcd-round-label">${i18n('RCD.Dock.Round', 'Round')} <b>${vm.round}</b></span>
 			${vm.factionLine ? `<span class="rcd-faction">${vm.factionLine}</span>` : ''}
 		</div>
 		<div class="rcd-flank rcd-enemies">
-			<div class="rcd-cards">${vm.enemies.map((c) => portraitCardHTML(c)).join('')}</div>
+			<div class="rcd-cards">${vm.enemies.map((c) => portraitCardHTML(c, vm.isGM)).join('')}</div>
 		</div>
 	</div>`;
 }
