@@ -10,16 +10,20 @@
 	--rt-disp: 'Grenze Gotisch', 'Times New Roman', serif;
 	--rt-verb: 'Pirata One', 'Grenze Gotisch', serif;
 	position: fixed; top: 0; left: 0; right: 0; z-index: 90; pointer-events: none;
-	padding: 12px 22px 10px;
+	padding: 8px 14px 7px;
 	background: linear-gradient(rgba(7,4,5,.94), rgba(7,4,5,.78) 82%, transparent);
 	border-top: 2px solid var(--rt-red);
 	font-family: var(--rt-mono);
+	/* user-scalable: shrinks toward top-centre; default 0.8, overridden inline from settings */
+	--rcd-scale: 0.8;
+	transform: scale(var(--rcd-scale));
+	transform-origin: top center;
 }
 /* pointer-events: the container AND the inner row pass clicks THROUGH (so Foundry's top
    chrome — #navigation etc. — stays clickable through the dock's empty band); only the
    interactive leaves (cards + totem, whose buttons inherit) capture. Fixes: the dock top
    chrome covered Foundry's top UI and blocked clicks (Austin, live). */
-#rcd-dock .rcd-inner { display: flex; gap: 18px; align-items: flex-end; justify-content: center; pointer-events: none; }
+#rcd-dock .rcd-inner { display: flex; gap: 14px; align-items: flex-end; justify-content: center; pointer-events: none; max-width: min(900px, 60vw); margin-inline: auto; overflow: hidden; }
 #rcd-dock .rcd-card, #rcd-dock .rcd-totem { pointer-events: auto; }
 #rcd-dock .rcd-flank { flex: 1 1 0; min-width: 0; }
 #rcd-dock .rcd-flank-head { font-family: var(--rt-mono); font-size: 9px; font-weight: 600; letter-spacing: .14em;
@@ -29,16 +33,16 @@
 #rcd-dock .rcd-allies .rcd-cards { justify-content: flex-end; }
 
 /* card */
-#rcd-dock .rcd-card { position: relative; width: 118px; flex: none; background: var(--rt-card);
-	border: 1px solid var(--rt-blood); padding: 6px 8px 8px; cursor: pointer;
-	clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+#rcd-dock .rcd-card { position: relative; width: 104px; flex: none; background: var(--rt-card);
+	border: 1px solid var(--rt-blood); padding: 5px 7px 7px; cursor: pointer;
+	clip-path: polygon(0 0, calc(100% - 9px) 0, 100% 9px, 100% 100%, 0 100%);
 	box-shadow: 3px 3px 0 rgba(0,0,0,.5); }
 #rcd-dock .rcd-active { border-color: var(--rt-red); border-top: 3px solid var(--rt-red);
 	box-shadow: 5px 5px 0 rgba(0,0,0,.6); transform: translateY(-6px); }
 #rcd-dock .rcd-spent { opacity: .55; }
 #rcd-dock .rcd-defeated { filter: grayscale(1) brightness(.7); cursor: default; }
 
-#rcd-dock .rcd-portrait { position: relative; height: 64px; border: 1px solid var(--rt-border);
+#rcd-dock .rcd-portrait { position: relative; height: 54px; border: 1px solid var(--rt-border);
 	overflow: hidden; background: var(--rt-raised); }
 #rcd-dock .rcd-portrait img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
@@ -67,8 +71,8 @@
 #rcd-dock .rcd-stamp::first-letter { text-transform: uppercase; }
 #rcd-dock .rcd-stamp { text-transform: uppercase; }
 #rcd-dock .rcd-stamp-dead { color: #fff; }
-#rcd-dock .rcd-name { font-family: var(--rt-disp); font-weight: 800; font-size: 13px; line-height: 1.15;
-	color: var(--rt-cream); margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#rcd-dock .rcd-name { font-family: var(--rt-disp); font-weight: 800; font-size: 12px; line-height: 1.15;
+	color: var(--rt-cream); margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #rcd-dock .rcd-active .rcd-name { color: #fff; text-shadow: 2px 2px 0 rgba(7,4,5,.9); }
 #rcd-dock .rcd-guise { display: inline-block; font-family: var(--rt-mono); font-size: 8px; font-weight: 600;
 	letter-spacing: .1em; color: #fff; background: var(--rcd-violet); padding: 1px 6px; margin-top: 3px;
@@ -96,17 +100,35 @@
 	padding: 4px 0; cursor: pointer; box-shadow: 2px 2px 0 rgba(0,0,0,.55); }
 
 /* totem */
-#rcd-dock .rcd-totem { position: relative; width: 132px; flex: none; align-self: flex-end; display: flex;
-	flex-direction: column; align-items: center; justify-content: center; padding: 8px 8px 9px; margin-bottom: 2px;
+#rcd-dock .rcd-totem { position: relative; width: 116px; flex: none; align-self: flex-end; display: flex;
+	flex-direction: column; align-items: center; justify-content: center; padding: 6px 7px 7px; margin-bottom: 2px;
 	background: var(--rt-panel); border: 1px solid var(--rt-blood); box-shadow: 4px 4px 0 rgba(0,0,0,.55);
-	clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px),
-		calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
+	clip-path: polygon(9px 0, calc(100% - 9px) 0, 100% 9px, 100% calc(100% - 9px),
+		calc(100% - 9px) 100%, 9px 100%, 0 calc(100% - 9px), 0 9px); }
 #rcd-dock .rcd-round-label { font-family: var(--rt-mono); font-size: 8px; font-weight: 600; letter-spacing: .2em;
 	text-transform: uppercase; color: var(--rt-muted); }
-#rcd-dock .rcd-round-label b { font-family: var(--rt-disp); font-weight: 900; font-size: 20px; line-height: 1;
+#rcd-dock .rcd-round-label b { font-family: var(--rt-disp); font-weight: 900; font-size: 18px; line-height: 1;
 	color: #fff; text-shadow: 2px 2px 0 var(--rt-blood); vertical-align: -3px; margin-left: 3px; }
-#rcd-dock .rcd-faction { font-family: var(--rt-verb); font-size: 16px; line-height: 1.25; color: #e0344a;
+#rcd-dock .rcd-faction { font-family: var(--rt-verb); font-size: 14px; line-height: 1.25; color: #e0344a;
 	letter-spacing: .04em; text-shadow: 1px 1px 0 rgba(7,4,5,.8); margin-top: 2px; }
+
+/* ── portrait mode (default) ──────────────────────────────────────────────
+   .rcd-inner-portraits hides the flank-head labels and tightens the gap.
+   Tiles are 52px portrait squares; the active tile shows a micro End-Turn bar. */
+#rcd-dock .rcd-inner-portraits { gap: 8px; }
+#rcd-dock .rcd-inner-portraits .rcd-flank-head { display: none; }
+#rcd-dock .rcd-inner-portraits .rcd-cards { padding-top: 0; gap: 6px; }
+#rcd-dock .rcd-tile { position: relative; flex: none; cursor: pointer; }
+#rcd-dock .rcd-tile .rcd-tile-port { position: relative; width: 52px; height: 52px; overflow: hidden;
+	border: 1px solid var(--rt-blood); background: var(--rt-raised); }
+#rcd-dock .rcd-tile .rcd-tile-port img { width: 100%; height: 100%; object-fit: cover; display: block; }
+#rcd-dock .rcd-tile.rcd-state-active .rcd-tile-port { border-color: var(--rt-red); border-top: 2px solid var(--rt-red); }
+#rcd-dock .rcd-tile.rcd-state-spent { opacity: .55; }
+#rcd-dock .rcd-tile.rcd-state-defeated { filter: grayscale(1) brightness(.7); cursor: default; }
+#rcd-dock .rcd-tile-end { display: block; width: 100%; font-family: var(--rt-verb); font-size: 10px;
+	line-height: 1; color: #fff; background: var(--rt-red); border: 1px solid var(--rt-blood);
+	padding: 3px 0; cursor: pointer; text-align: center; }
+#rcd-dock .rcd-tile-end:hover { filter: brightness(.92); }
 
 /* party surface collapse while the dock holds the top of the screen */
 .rcd-collapsed { display: none !important; }

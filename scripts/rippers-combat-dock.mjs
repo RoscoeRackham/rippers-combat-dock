@@ -138,10 +138,10 @@ export const PARTY_SURFACE_SELECTORS = [
 	'#rippers-party-card', '.rippers-party-card',               // ours, when it lands
 	'#party-hud', '.party-overview',                            // generic fallbacks
 ];
-export function findPartySurfaces(root) {
+export function findPartySurfaces(root, sels = PARTY_SURFACE_SELECTORS) {
 	if (!root?.querySelectorAll) return [];
 	const out = [];
-	for (const sel of PARTY_SURFACE_SELECTORS) {
+	for (const sel of sels) {
 		for (const el of root.querySelectorAll(sel)) if (!out.includes(el)) out.push(el);
 	}
 	return out;
@@ -249,6 +249,34 @@ function dockHTML(vm) {
 	</div>`;
 }
 
+// ── portrait mode (default) ───────────────────────────────────────────────
+function portraitCardHTML(c) {
+	const esc = globalThis.foundry?.utils?.escapeHTML ?? ((s) => String(s ?? ''));
+	const stagger = c.stagger
+		? `<div class="rcd-ribbon"><span>${i18n('RCD.Card.Staggered', 'Staggered')}</span></div>` : '';
+	const endBtn = c.canEnd
+		? `<button type="button" class="rcd-tile-end" data-end>${i18n('RCD.Card.EndTurn', 'End the turn')}</button>` : '';
+	return `<div class="rcd-tile rcd-state-${c.state}" data-combatant="${esc(c.id)}" data-can-act="${c.canAct}">
+		<div class="rcd-tile-port">${c.img ? `<img src="${esc(c.img)}" alt="">` : ''}${stagger}</div>
+		${endBtn}
+	</div>`;
+}
+
+function portraitDockHTML(vm) {
+	return `<div class="rcd-inner rcd-inner-portraits">
+		<div class="rcd-flank rcd-allies">
+			<div class="rcd-cards">${vm.allies.map((c) => portraitCardHTML(c)).join('')}</div>
+		</div>
+		<div class="rcd-totem">
+			<span class="rcd-round-label">${i18n('RCD.Dock.Round', 'Round')} <b>${vm.round}</b></span>
+			${vm.factionLine ? `<span class="rcd-faction">${vm.factionLine}</span>` : ''}
+		</div>
+		<div class="rcd-flank rcd-enemies">
+			<div class="rcd-cards">${vm.enemies.map((c) => portraitCardHTML(c)).join('')}</div>
+		</div>
+	</div>`;
+}
+
 async function onCardAction(ev) {
 	const g = RT()?.game;
 	const combat = g?.combat;
@@ -292,8 +320,13 @@ export function renderDock() {
 		dockEl.addEventListener('click', onCardAction);
 		document.body.appendChild(dockEl);
 	}
-	collapsePartySurfaces(); // re-scan every render — a party surface may appear after the dock opens
-	dockEl.innerHTML = dockHTML(buildLiveVM(combat));
+	// apply current scale every render so live-setting changes are reflected
+	const scale = g?.settings?.get?.(MODULE_ID, 'uiScale') ?? 0.8;
+	dockEl.style.setProperty('--rcd-scale', scale);
+	const mode = g?.settings?.get?.(MODULE_ID, 'dockMode') ?? 'portraits';
+	collapsePartySurfaces(mode); // re-scan every render — a party surface may appear after the dock opens
+	const vm = buildLiveVM(combat);
+	dockEl.innerHTML = mode === 'portraits' ? portraitDockHTML(vm) : dockHTML(vm);
 	updateTurnMarker(); // the acting combatant's canvas marker rides the same refresh
 }
 
@@ -303,8 +336,13 @@ export function closeDock() {
 	removeTurnMarker();
 }
 
-function collapsePartySurfaces() {
-	for (const el of findPartySurfaces(document)) {
+function collapsePartySurfaces(mode = 'portraits') {
+	// In 'full' mode the dock draws the same stats as #rah-party, so collapse it.
+	// In 'portraits' mode both surfaces are complementary; leave #rah-party visible.
+	const sels = mode === 'full'
+		? [...PARTY_SURFACE_SELECTORS, '#rah-party']
+		: PARTY_SURFACE_SELECTORS;
+	for (const el of findPartySurfaces(document, sels)) {
 		if (el.classList.contains('rcd-collapsed')) continue;
 		el.classList.add('rcd-collapsed');
 		collapsedSurfaces.push(el);
@@ -434,6 +472,22 @@ if (globalThis.Hooks?.on) {
 			hint: 'RCD.Settings.ShowTurnMarkerHint',
 			scope: 'client', config: true, type: Boolean, default: true,
 			onChange: () => updateTurnMarker(),
+		});
+		game.settings.register(MODULE_ID, 'uiScale', {
+			name: 'RCD.Settings.UiScale',
+			hint: 'RCD.Settings.UiScaleHint',
+			scope: 'client', config: true, type: Number,
+			range: { min: 0.5, max: 1.0, step: 0.05 },
+			default: 0.8,
+			onChange: (v) => { if (dockEl) dockEl.style.setProperty('--rcd-scale', v); },
+		});
+		game.settings.register(MODULE_ID, 'dockMode', {
+			name: 'RCD.Settings.DockMode',
+			hint: 'RCD.Settings.DockModeHint',
+			scope: 'client', config: true, type: String,
+			choices: { portraits: 'Portraits (default)', full: 'Full cards' },
+			default: 'portraits',
+			onChange: () => renderDock(),
 		});
 	});
 	Hooks.once('ready', () => {

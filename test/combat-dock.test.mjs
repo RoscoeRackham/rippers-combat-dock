@@ -161,7 +161,7 @@ test('GUARD: status toggles are ActiveEffect create/delete, not updateActor — 
 });
 
 test('GUARD: party collapse re-scans every render and never hard-depends on one HUD', () => {
-	assert.match(src, /collapsePartySurfaces\(\); \/\/ re-scan every render/);
+	assert.match(src, /collapsePartySurfaces\([^)]*\); \/\/ re-scan every render/);
 	assert.doesNotMatch(src, /relationships[\s\S]*stylish-hud/);
 });
 
